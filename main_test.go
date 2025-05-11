@@ -90,7 +90,8 @@ func TestCafeCount(t *testing.T) {
 
 // проверяет результат поиска кафе по указанной подстроке в параметре search.
 func TestCafeSearch(t *testing.T) {
-	sWant := 0
+	var trimSpaceResBody string
+	var sWant int
 	handler := http.HandlerFunc(mainHandle)
 
 	requests := []struct {
@@ -108,12 +109,13 @@ func TestCafeSearch(t *testing.T) {
 		req := httptest.NewRequest("GET", "/cafe?city=moscow&search="+v.search, nil)
 		handler.ServeHTTP(response, req)
 
-		if !strings.Contains(req.RequestURI, strings.ToLower(v.search)) {
-			t.Errorf("not contain %s, in %s", strings.ToLower(v.search), req.RequestURI)
-		}
-
-		resBody := strings.Split(strings.TrimSpace(response.Body.String()), ",")
+		trimSpaceResBody = strings.TrimSpace(response.Body.String())
+		resBody := strings.Split(trimSpaceResBody, ",")
 		if !slices.Contains(resBody, "") {
+			if !strings.Contains(strings.ToLower(trimSpaceResBody), strings.ToLower(v.search)) {
+				t.Errorf("not contain %s, in %s", strings.ToLower(v.search), trimSpaceResBody)
+			}
+
 			sWant = len(resBody)
 		}
 
